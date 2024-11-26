@@ -1,33 +1,340 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { createContext, useEffect, useState } from "react";
+import Header from "./Components/Header";
+import { Rates } from "./types";
+import { saveToLocalStorage } from "./helpers/helpers";
+import Converter from "./Components/Converter";
+import { getCurrency } from "./api/currency";
+// import reactLogo from "./assets/react.svg";
+// import viteLogo from "/vite.svg";
+
+const res = {
+  success: true,
+  terms: "https://fxfeed.io/terms",
+  privacy: "https://fxfeed.io/privacy",
+  timestamp: 1732633697,
+  date: "2024-11-26T15:08:17Z",
+  base: "UAH",
+  rates: {
+    ADA: 0.024784,
+    AED: 0.088644,
+    AFN: 1.644395,
+    AKT: 0.006171,
+    ALL: 2.268114,
+    AMD: 9.415985,
+    AMP: 4.54919,
+    ANG: 0.043423,
+    AOA: 22.205137,
+    APE: 0.017882,
+    APT: 0.002004,
+    ARB: 0.026541,
+    ARS: 24.291335,
+    ATS: 0.317663,
+    AUD: 0.037241,
+    AWG: 0.0432,
+    AXS: 0.0032,
+    AZM: 205.138242,
+    AZN: 0.04005,
+    BAM: 0.045151,
+    BAT: 0.087463,
+    BBD: 0.048268,
+    BCH: 0.000048,
+    BDT: 2.884168,
+    BEF: 0.931266,
+    BGN: 0.044484,
+    BHD: 0.009006,
+    BIF: 70.81876,
+    BMD: 0.024134,
+    BNB: 0.000037,
+    BND: 0.031548,
+    BOB: 0.166927,
+    BRL: 0.139959,
+    BSD: 0.024134,
+    BSV: 0.000353,
+    BSW: 0.322005,
+    BTC: 0,
+    BTG: 0.000753,
+    BTN: 2.035661,
+    BTT: 18302.28895,
+    BWP: 0.328733,
+    BYN: 0.078918,
+    BYR: 789.184712,
+    BZD: 0.0488,
+    CAD: 0.034056,
+    CDF: 69.057242,
+    CFX: 0.13333,
+    CHF: 0.021404,
+    CHZ: 0.261009,
+    CLP: 23.562294,
+    CNH: 0.175301,
+    CNY: 0.172837,
+    COP: 105.726635,
+    CRC: 12.294875,
+    CRO: 0.135977,
+    CRV: 0.046197,
+    CUC: 0.024134,
+    CUP: 0.579147,
+    CVE: 2.545637,
+    CVX: 0.007709,
+    CYP: 0.013511,
+    CZK: 0.582908,
+    DAI: 0.024132,
+    DCR: 0.001503,
+    DEM: 0.045151,
+    DFI: 1.456288,
+    DJF: 4.291394,
+    DKK: 0.171723,
+    DOP: 1.457588,
+    DOT: 0.002887,
+    DZD: 3.231685,
+    EEK: 0.36121,
+    EGP: 1.17502,
+    ENJ: 0.086021,
+    EOS: 0.029466,
+    ERN: 0.362014,
+    ESP: 3.841103,
+    ETB: 2.968471,
+    ETC: 0.0008,
+    ETH: 0.000007,
+    EUR: 0.023025,
+    FEI: 0.024649,
+    FIL: 0.004318,
+    FIM: 0.13726,
+    FJD: 0.055075,
+    FKP: 0.019264,
+    FLR: 1.083216,
+    FRF: 0.15143,
+    FTM: 0.024167,
+    FTT: 0.010192,
+    FXS: 0.007864,
+    GBP: 0.019223,
+    GEL: 0.066175,
+    GGP: 0.019264,
+    GHC: 3800.381677,
+    GHS: 0.380038,
+    GIP: 0.019264,
+    GMD: 1.721407,
+    GMX: 0.000742,
+    GNF: 208.04861,
+    GNO: 0.000089,
+    GRD: 7.866382,
+    GRT: 0.096541,
+    GTQ: 0.186333,
+    GYD: 5.042132,
+    HKD: 0.18782,
+    HNL: 0.609773,
+    HNT: 0.004007,
+    HOT: 7.933839,
+    HRK: 0.173937,
+    HTG: 3.168091,
+    HUF: 9.455464,
+    ICP: 0.002032,
+    IDR: 386.998052,
+    IEP: 0.018181,
+    ILS: 0.087994,
+    IMP: 0.019264,
+    IMX: 0.014041,
+    INJ: 0.000878,
+    INR: 2.046804,
+    IQD: 31.620394,
+    IRR: 1015.555029,
+    ISK: 3.349883,
+    ITL: 44.699749,
+    JEP: 0.019264,
+    JMD: 3.838491,
+    JOD: 0.017111,
+    JPY: 3.713485,
+    KAS: 0.158705,
+    KCS: 0.0021,
+    KDA: 0.025448,
+    KES: 3.122835,
+    KGS: 2.094695,
+    KHR: 97.145238,
+    KMF: 11.357318,
+    KNC: 0.036716,
+    KPW: 21.7207,
+    KRW: 33.072655,
+    KSM: 0.000587,
+    KWD: 0.007421,
+    KYD: 0.019944,
+    KZT: 12.042765,
+    LAK: 529.710994,
+    LBP: 2163.366,
+    LDO: 0.014598,
+    LEO: 0.002924,
+    LKR: 6.93189,
+    LRC: 0.108507,
+    LRD: 4.343798,
+    LSL: 0.438073,
+    LTC: 0.000256,
+    LTL: 0.079709,
+    LUF: 0.931266,
+    LVL: 0.016224,
+    LYD: 0.118011,
+    MAD: 0.237985,
+    MBX: 0.055746,
+    MDL: 0.44,
+    MGA: 108.519239,
+    MGF: 563.645907,
+    MKD: 1.414614,
+    MKR: 0.000013,
+    MMK: 50.65381,
+    MNT: 82.754405,
+    MOP: 0.193475,
+    MRO: 9.619438,
+    MRU: 0.961943,
+    MTL: 0.00991,
+    MUR: 1.13036,
+    MVR: 0.372416,
+    MWK: 41.843361,
+    MXN: 0.496771,
+    MXV: 0.058876,
+    MYR: 0.108693,
+    MZM: 1542.31513,
+    MZN: 1.542315,
+    NAD: 0.438073,
+    NEO: 0.001661,
+    NFT: 48511.057947,
+    NGN: 40.581751,
+    NIO: 0.887522,
+    NLG: 0.050873,
+    NOK: 0.2685,
+    NPR: 3.258584,
+    NZD: 0.041354,
+    OKB: 0.000448,
+    OMR: 0.009192,
+    ONE: 0.96379,
+    PAB: 0.024134,
+    PEN: 0.091039,
+    PGK: 0.093375,
+    PHP: 1.43567,
+    PKR: 6.627199,
+    PLN: 0.099371,
+    PTE: 4.628226,
+    PYG: 188.809108,
+    QAR: 0.087848,
+    QNT: 0.000246,
+    ROL: 1148.973288,
+    RON: 0.114897,
+    RPL: 0.001822,
+    RSD: 2.700468,
+    RUB: 2.509985,
+    RVN: 0.973913,
+    RWF: 33.016401,
+    SAR: 0.089611,
+    SBD: 0.202026,
+    SCR: 0.327955,
+    SDD: 1451.755242,
+    SDG: 14.517552,
+    SEK: 0.265701,
+    SGD: 0.032533,
+    SHP: 0.019264,
+    SIT: 5.532207,
+    SKK: 0.695473,
+    SLE: 0.547821,
+    SLL: 547.821179,
+    SNX: 0.010586,
+    SOL: 0.000101,
+    SOS: 13.768617,
+    SPL: 0.004022,
+    SRD: 0.859644,
+    SRG: 859.644813,
+    STD: 570.610932,
+    STN: 0.57061,
+    STX: 0.011077,
+    SUI: 0.007446,
+    SVC: 0.211174,
+    SYP: 313.82865,
+    SZL: 0.438073,
+    THB: 0.837648,
+    TJS: 0.257315,
+    TMM: 422.343355,
+    TMT: 0.084468,
+    TND: 0.07645,
+    TON: 0.003901,
+    TOP: 0.056553,
+    TRL: 835697.637989,
+    TRX: 0.12192,
+    TRY: 0.835779,
+    TTD: 0.163948,
+    TVD: 0.037309,
+    TWD: 0.770499,
+    TWT: 0.022482,
+    TZS: 62.223201,
+    UGX: 89.361921,
+    UNI: 0.002073,
+    USD: 0.024134,
+    UYU: 1.028527,
+    UZS: 309.720288,
+    VAL: 44.699749,
+    VEB: 112428714.450677,
+    VED: 1.124292,
+    VEF: 112429.266767,
+    VES: 1.124292,
+    VET: 0.587938,
+    VND: 606.241142,
+    VUV: 2.875841,
+    WOO: 0.092868,
+    WST: 0.069952,
+    XAF: 15.143091,
+    XAG: 0.000796,
+    XAU: 0.000009,
+    XBT: 0,
+    XCD: 0.065305,
+    XCH: 0.000948,
+    XDC: 0.432055,
+    XDR: 0.018449,
+    XEC: 520.654896,
+    XEM: 0.864611,
+    XLM: 0.04754,
+    XMR: 0.000153,
+    XOF: 14.880431,
+    XPD: 0.000024,
+    XPF: 2.705976,
+    XPT: 0.000025,
+    XRP: 0.016725,
+    XTZ: 0.019298,
+    YER: 6.039406,
+    ZAR: 0.437287,
+    ZEC: 0.000494,
+    ZIL: 1.006928,
+    ZMK: 666.645939,
+    ZMW: 0.666645,
+    ZWD: 8.734196,
+    ZWG: 0.611162,
+    ZWL: 1527.126794,
+  },
+};
+
+export const RatesContext = createContext<Rates | null>(null);
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [rates, setRates] = useState<Rates | null>(null);
+
+  useEffect(() => {
+    getCurrency();
+    setRates(() => {
+      return { ...res, rates: { ...res.rates, UAH: 1 } };
+    });
+    saveToLocalStorage("rates", rates);
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <RatesContext.Provider value={rates}>
+      <Header />
+
+      <main className="pb-16 flex grow items-center">
+        <div className="container mx-auto px-4 w-full">
+          <div className="flex items-center justify-center">
+            <div className="text-center">
+              <Converter />
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer className="flex justify-center items-center h-6 bg-black text-slate-100 text-xs">
+        All rights reserved © {new Date().getFullYear()}
+      </footer>
+    </RatesContext.Provider>
   );
 }
 
