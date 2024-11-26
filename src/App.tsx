@@ -322,7 +322,7 @@ function App() {
     <RatesContext.Provider value={rates}>
       <Header />
 
-      <main className="pb-16 flex grow items-center">
+      <main className="pt-8 pb-24 flex grow items-center">
         <div className="container mx-auto px-4 w-full">
           <div className="flex items-center justify-center">
             <div className="text-center">

@@ -7,3 +7,8 @@ export type Rates = {
   base: string;
   rates: Record<string, number>;
 };
+
+export type Row = {
+  id: number;
+  cur: string;
+};

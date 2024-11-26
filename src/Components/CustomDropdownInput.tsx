@@ -1,7 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { RatesContext } from "../App";
 
-export default function CustomDropdownInput() {
+export default function CustomDropdownInput({
+  setActiveCur,
+}: {
+  setActiveCur: (currency: string) => void;
+}) {
   const ratesContext = useContext(RatesContext);
 
   const [filteredRates, setFilteredRates] = useState<string[] | []>([]);
@@ -25,7 +29,7 @@ export default function CustomDropdownInput() {
   }, [currency]);
 
   return (
-    <div className="relative text-slate-100">
+    <li className="relative text-slate-100">
       <div className="w-full flex py-2">
         <div onClick={() => setIsOpen(!isOpen)}>
           <input
@@ -58,6 +62,7 @@ export default function CustomDropdownInput() {
                 onClick={() => {
                   setCurrency(rate);
                   setIsOpen(false);
+                  setActiveCur(rate);
                 }}
               >
                 {rate}
@@ -65,6 +70,6 @@ export default function CustomDropdownInput() {
             ))}
         </ul>
       )}
-    </div>
+    </li>
   );
 }
