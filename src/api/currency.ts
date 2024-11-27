@@ -1,16 +1,17 @@
-// import axios from "axios";
+import axios from "axios";
+
+import { Rates } from "../types";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 
-export async function getCurrency() {
-  console.log("apiKey >>>", apiKey);
-  // try {
-  //   const responce = axios.get(
-  //     `https://api.fxfeed.io/v1/latest?base=UAH&api_key=${apiKey}`
-  //   );
+export async function getCurrency(base: string = "UAH"): Promise<void | Rates> {
+  try {
+    const res = await axios.get(
+      `https://api.fxfeed.io/v1/latest?base=${base}&api_key=${apiKey}`
+    );
 
-  //   console.log("responce >>>", responce);
-  // } catch (err) {
-  //   console.log(err);
-  // }
+    return res.data;
+  } catch (err) {
+    console.log(err);
+  }
 }

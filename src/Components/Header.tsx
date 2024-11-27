@@ -1,7 +1,8 @@
 import { useContext } from "react";
-import { RatesContext } from "../App";
 import Loader from "./Loader";
 import mainLogo from "/main-icon.svg";
+import { calculateExchangeRates } from "../helpers/helpers";
+import { RatesContext } from "../App";
 
 export default function Header() {
   const ratesContext = useContext(RatesContext);
@@ -18,8 +19,8 @@ export default function Header() {
           <div className="text-sm font-thin font-sans">
             {ratesContext ? (
               <>
-                <div>1 USD = {+ratesContext.rates.USD.toFixed(2)} UAH</div>
-                <div>1 EUR = {+ratesContext.rates.EUR.toFixed(2)} UAH</div>
+                <div>USD = {calculateExchangeRates("USD")} UAH</div>
+                <div>EUR = {calculateExchangeRates("EUR")} UAH</div>
               </>
             ) : (
               <Loader size={32} />

@@ -7,3 +7,7 @@ export function getFromLocalStorage(key: string) {
 
   return value ? JSON.parse(value) : null;
 }
+
+export function calculateExchangeRates(key: string, val = 1) {
+  return (val / getFromLocalStorage("rates").rates[key]).toFixed(2);
+}

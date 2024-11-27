@@ -8,7 +8,8 @@ export type Rates = {
   rates: Record<string, number>;
 };
 
-export type Row = {
+export type CurrencyRow = {
   id: number;
   cur: string;
+  value: string;
 };

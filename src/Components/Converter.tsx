@@ -1,65 +1,114 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CustomDropdownInput from "./CustomDropdownInput";
-import { getFromLocalStorage } from "../helpers/helpers";
-import { Row } from "../types";
+import { getFromLocalStorage, saveToLocalStorage } from "../helpers/helpers";
+import { CurrencyRow, Rates } from "../types";
+import { RatesContext } from "../App";
+import AddRemoveRows from "./AddRemoveRows";
 
 export default function Converter() {
-  const [activeCur, setActiveCur] = useState("");
-  const [rows, setRows] = useState<Row[] | []>([]);
+  const ratesContext = useContext(RatesContext);
+  const [rows, setRows] = useState<CurrencyRow[]>(
+    getFromLocalStorage("rows") || [
+      { id: 1, cur: "UAH", value: "0.00" },
+      { id: 2, cur: "USD", value: "0.00" },
+      { id: 3, cur: "EUR", value: "0.00" },
+    ]
+  );
+  const [activeCurrency, setActiveCurrency] = useState(
+    getFromLocalStorage("activeCur") || "UAH"
+  );
 
   useEffect(() => {
-    const initialCurrency = getFromLocalStorage("activeCurrency") || "UAH";
-    const initialEntries = getFromLocalStorage("entries") || [
-      { id: 0, cur: "UAH" },
-      { id: 1, cur: "USD" },
-      { id: 2, cur: "EUR" },
-    ];
+    if (!getFromLocalStorage("rows")) {
+      saveToLocalStorage("rows", rows);
+    }
 
-    setActiveCur(initialCurrency);
-    setRows(initialEntries);
+    if (!getFromLocalStorage("activeCur")) {
+      saveToLocalStorage("activeCur", activeCurrency);
+    }
   }, []);
 
-  function handleCurrencyChange(currency: string) {
-    setActiveCur(currency);
+  function handleUpdateRows(updatedRow: CurrencyRow) {
+    const updatedRows = [...rows].map((row) => {
+      if (row.id === updatedRow.id) {
+        return updatedRow;
+      }
+
+      return row;
+    });
+
+    setRows(updatedRows);
+    saveToLocalStorage("rows", updatedRows);
+  }
+
+  function handleUpdateCurrency(currency: string, value: string) {
+    const updatedRates = updateRatesBase(
+      getFromLocalStorage("rates"),
+      currency
+    );
+
+    const updatedRows = rows.map((row) => {
+      if (row.cur === currency) {
+        return { ...row, value };
+      }
+
+      return {
+        ...row,
+        value: (updatedRates.rates[row.cur] * +value).toFixed(2).toString(),
+      };
+    });
+
+    setActiveCurrency(currency);
+    saveToLocalStorage("activeCur", currency);
+
+    setRows(updatedRows);
+    saveToLocalStorage("rows", updatedRows);
+  }
+
+  function updateRatesBase(ratesObject: Rates, newBase: string) {
+    const newBaseRate = ratesObject.rates[newBase];
+    const updatedRates = { ...ratesObject };
+
+    // Recalculate all rates relative to the new base
+    for (const [currency, rate] of Object.entries(ratesObject.rates)) {
+      updatedRates.rates[currency] = rate / newBaseRate;
+    }
+
+    // Update the base and rates in the original object
+    updatedRates.base = newBase;
+
+    return updatedRates;
   }
 
   function handleAddRow() {
-    const newId = rows.length > 0 ? rows[rows.length - 1].id + 1 : 0;
-    setRows([...rows, { id: newId, cur: activeCur }]);
+    const lastEl = rows[rows.length - 1];
+
+    setRows([...rows, { ...lastEl, id: lastEl.id + 1 }]);
   }
 
   function handleRemoveRow() {
     setRows(rows.slice(0, -1));
   }
 
+  if (!ratesContext) return;
+
   return (
-    <>
-      {activeCur && rows.length > 0 && (
-        <ul className="p-4 w-full border rounded-lg shadow-2xl">
-          {rows.map((_, i) => (
-            <CustomDropdownInput key={i} setActiveCur={handleCurrencyChange} />
-          ))}
+    <ul className="p-4 w-full border rounded-lg shadow-2xl">
+      {rows.map((el) => (
+        <CustomDropdownInput
+          key={el.id}
+          currentElement={el}
+          activeCurrency={activeCurrency}
+          updateCurrency={handleUpdateCurrency}
+          updateRow={handleUpdateRows}
+        />
+      ))}
 
-          <li className="mt-3 flex justify-end">
-            <button
-              className="pb-0 h-9 w-9 flex justify-center items-center font-bold border border-green-600 rounded-3xl relative"
-              onClick={handleAddRow}
-            >
-              <div className="absolute bg-green-600 h-0.5 w-4"></div>
-              <div className="absolute bg-green-600 h-4 w-0.5"></div>
-            </button>
-
-            {rows.length > 3 && (
-              <button
-                className="ml-4 pb-0 h-9 w-9 flex justify-center items-center font-bold border border-red-600 rounded-3xl relative"
-                onClick={handleRemoveRow}
-              >
-                <div className="absolute bg-red-600 h-0.5 w-4"></div>
-              </button>
-            )}
-          </li>
-        </ul>
-      )}
-    </>
+      <AddRemoveRows
+        rows={rows}
+        addRow={handleAddRow}
+        removeRow={handleRemoveRow}
+      />
+    </ul>
   );
 }
