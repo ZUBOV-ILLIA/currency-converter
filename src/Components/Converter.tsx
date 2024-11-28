@@ -28,6 +28,11 @@ export default function Converter() {
     }
   }, []);
 
+  function handleSetRows(value: CurrencyRow[]) {
+    setRows(value);
+    saveToLocalStorage("rows", value);
+  }
+
   function handleUpdateRows(updatedRow: CurrencyRow) {
     const updatedRows = [...rows].map((row) => {
       if (row.id === updatedRow.id) {
@@ -61,8 +66,7 @@ export default function Converter() {
     setActiveCurrency(currency);
     saveToLocalStorage("activeCur", currency);
 
-    setRows(updatedRows);
-    saveToLocalStorage("rows", updatedRows);
+    handleSetRows(updatedRows);
   }
 
   function updateRatesBase(ratesObject: Rates, newBase: string) {
@@ -83,11 +87,11 @@ export default function Converter() {
   function handleAddRow() {
     const lastEl = rows[rows.length - 1];
 
-    setRows([...rows, { ...lastEl, id: lastEl.id + 1 }]);
+    handleSetRows([...rows, { ...lastEl, id: lastEl.id + 1 }]);
   }
 
   function handleRemoveRow() {
-    setRows(rows.slice(0, -1));
+    handleSetRows(rows.slice(0, -1));
   }
 
   if (!ratesContext) return;

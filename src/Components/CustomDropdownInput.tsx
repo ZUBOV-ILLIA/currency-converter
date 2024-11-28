@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { CurrencyRow } from "../types";
 import { RatesContext } from "../App";
 
@@ -13,14 +13,38 @@ export default function CustomDropdownInput({
   updateCurrency: (currency: string, value: string) => void;
   updateRow: (row: CurrencyRow) => void;
 }) {
+  const curSelectorRef = useRef<HTMLDivElement>(null);
   const ratesContext = useContext(RatesContext);
 
   const [value, setValue] = useState(currentElement.value);
   const [isOpen, setIsOpen] = useState(false);
+  const currencies = useMemo(
+    () => (ratesContext?.rates && Object.keys(ratesContext.rates).sort()) || [],
+    []
+  );
 
   useEffect(() => {
     setValue(currentElement.value);
   }, [currentElement.value]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        curSelectorRef.current &&
+        !curSelectorRef.current.contains(event.target as Node)
+      ) {
+        setTimeout(() => {
+          setIsOpen(false);
+        }, 0);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   function handleInputOnchange(e: React.ChangeEvent<HTMLInputElement>) {
     const newValue = e.target.value;
@@ -49,6 +73,7 @@ export default function CustomDropdownInput({
       >
         {/* currency selector */}
         <div
+          ref={curSelectorRef}
           onClick={() => {
             setIsOpen(!isOpen);
           }}
@@ -74,8 +99,8 @@ export default function CustomDropdownInput({
       {/* currencies list */}
       {isOpen && (
         <ul className="absolute top-full max-h-36 overflow-y-scroll w-full bg-slate-400 rounded-md z-10">
-          {Object.keys(ratesContext.rates).length > 0 &&
-            Object.keys(ratesContext.rates).map((rate) => (
+          {currencies.length > 0 &&
+            currencies.map((rate) => (
               <li
                 className="px-4 py-2 hover:bg-slate-500"
                 key={rate}
