@@ -19,8 +19,6 @@ function App() {
 
       const newRates = res;
 
-      console.log(res);
-
       newRates.rates[res.base] = 1;
 
       setRates(newRates);
