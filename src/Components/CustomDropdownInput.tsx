@@ -66,6 +66,7 @@ export default function CustomDropdownInput({
           value={value}
           onChange={handleInputOnchange}
           onFocus={(e) => e.target.select()}
+          inputMode="numeric"
           min={0}
         />
       </div>
