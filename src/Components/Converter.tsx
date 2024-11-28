@@ -42,8 +42,7 @@ export default function Converter() {
       return row;
     });
 
-    setRows(updatedRows);
-    saveToLocalStorage("rows", updatedRows);
+    handleSetRows(updatedRows);
   }
 
   function handleUpdateCurrency(currency: string, value: string) {
